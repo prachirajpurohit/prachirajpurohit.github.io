@@ -1,60 +1,123 @@
 ---
-title: "Blog Collection"
-description: "How to add posts to your blog."
-date: "Mar 21 2024"
+title: "Scrollview v/s FlatList in RN"
+description: "Understanding rendering, virtualization, and when to use each component"
+date: "June 09 2026"
 ---
 
-The `blog` collections is found in `src/content/blog`.
+### ScrollView
 
-Working with the `blog` collection:
+`ScrollView` renders **all its children at once**.
 
-```
-📁 /src/content/blog
-└── 📁 post-1
-      └── 📄 index.md
-└── 📁 post-2
-      └── 📄 index.mdx
-```
-
-In the above example, two static pages will be generated, based on the existence of a classic markdown `.md` file or a jsx compatible markdown `.mdx` file. The folder name represents the slug:
-
-- `https://example.com/blog/post-1`
-- `https://example.com/blog/post-2`
-
-
-All content must be preceded by required metadata in the markdown file in `yaml` format, and be enclosed by triple dashes. --- ---
-
-```mdx
----
-title: "My cool new title"
-description: "A description of my content."
-date: "Mar 22 2024"
-draft: false
----
+```jsx
+<ScrollView>
+  {items.map((item) => (
+    <Item key={item.id} />
+  ))}
+</ScrollView>
 ```
 
-Metadata fields
+If you have 1,000 items, React Native creates and mounts 1,000 item components immediately, even if only 10 are visible on screen.
 
-| Field       | Req | Type    | Remarks                                          |
-| :---------- | :-- | :------ | :----------------------------------------------- |
-| title       | Yes | string  | Title of the content. Used in SEO and RSS.       |
-| description | Yes | string  | Description of the content. Used in SEO and RSS. |
-| date        | Yes | string  | Must be a valid date string (able to be parsed). |
-| draft       | No* | boolean | draft: true, content will not be published.      |
+**Pros**
 
-All that's left to do is write your content under the metadata.
+- Simple to use
 
-```mdx
+- Good for small lists
+
+- Flexible layout
+
+**Cons**
+
+- High memory usage for large lists
+
+- Slower initial render
+
+- Performance degrades as list size grows
+
 ---
-title: "My cool new title"
-description: "A description of my content."
-date: "Mar 22 2024"
-draft: false
----
 
-### Woot
+### FlatList
 
-This is a paragraph.
+`FlatList` is optimized for rendering large datasets.
+
+```jsx
+<FlatList data={items} renderItem={({ item }) => <Item item={item} />} />
 ```
 
-🎉 Congrats, you are now a blogger.
+Instead of rendering everything, it renders:
+
+- Visible items
+
+- A small buffer around visible items
+
+As you scroll, it:
+
+- Creates new items entering the viewport
+
+- Recycles/removes items that move far off-screen
+
+This behavior is often called **virtualization** or **windowing**.
+
+**Pros**
+
+- Lower memory usage
+
+- Better performance for large lists
+
+- Built-in features like:
+
+  - item separators
+
+  - pull-to-refresh
+
+  - infinite scrolling
+
+  - viewability tracking
+
+**Cons**
+
+- Slightly more configuration
+
+- Can be overkill for tiny lists
+
+---
+
+### FlatList & ScrollView internally
+
+The hierarchy is roughly:
+
+```text
+ScrollView
+   ↑
+VirtualizedList
+   ↑
+FlatList
+```
+
+`FlatList` is built on top of **VirtualizedList**, which itself uses scrollable native views under the hood.
+
+> ScrollView renders all children eagerly, while FlatList is a higher-level abstraction built on VirtualizedList that provides virtualization (lazy rendering/windowing) for large lists.
+
+---
+
+### Why do many developers "not see much difference"?
+
+Because with small datasets (10–50 items), the difference is often negligible.
+
+```jsx
+const items = Array.from({ length: 20 });
+```
+
+Both feel equally fast.
+
+The difference becomes obvious when you have:
+
+```jsx
+const items = Array.from({ length: 5000 });
+```
+
+A `ScrollView` may consume significant memory and take longer to mount, while a `FlatList` remains responsive because only a subset of items is rendered at any time.
+
+### A concise blog summary
+
+> `ScrollView` renders every child component immediately, making it suitable for small lists. `FlatList` builds on React Native's `VirtualizedList` to render only visible items and a small buffer around them, improving memory usage and performance for large datasets. While both provide scrolling, `FlatList` is specifically optimized for list virtualization and should generally be preferred for dynamic or large collections of data.
