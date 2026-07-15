@@ -33,13 +33,16 @@ const work = await Promise.all(
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
     <h4 class="animate font-semibold text-black dark:text-white">
-      Hi, I'm Prachi <span class="text-xl">👋🏻</span> 
+      Hi, I'm Prachi <span class="text-xl text-amber-400" id="kaomoji">👋🏻</span> 
     </h4>
     <div class="space-y-16">
       <section>
         <article class="space-y-4">
           <p class="animate">
              I'm a React Native developer, currently open for new opportunities. Mobile development is where my focus lies today, and I approach it with intent and continued learning.
+          </p>
+          <p class="animate">
+            I've also been exploring Rust - as part of Rektoff and recently graduated from Atrium Academy's Uniswap Hook Incubator (UHI), building Uniswap v4 hooks in Solidity.
           </p>
              <p class="animate">
       Beyond development, I maintain an interest in philosophy, space tech, neuroscience, and spend time caring for my plants.
@@ -147,3 +150,22 @@ const work = await Promise.all(
     </div>
   </Container>
 </PageLayout>
+
+<script>
+  const kaomojis = [
+  "(◠‿◠✿)",
+  "ヾ(•ω•`)o",
+  "o(〃＾▽＾〃)o",
+  "(づ｡◕‿‿◕｡)づ",
+  "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧"
+];
+
+let index = 0;
+
+  const spanElement = document.getElementById("kaomoji")!;
+
+  setInterval(() => {
+    spanElement.textContent = kaomojis[index];
+    index = (index +1) % kaomojis.length; 
+  }, 800);
+</script>
